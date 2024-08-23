@@ -6,6 +6,8 @@ pluginManagement {
         maven { url = uri("https://maven.neoforged.net/releases/") }
         gradlePluginPortal()
     }
+
+    includeBuild("build-logic")
 }
 
 include("common")
