@@ -92,6 +92,7 @@ fun exportSourceSetResources(name: String, sourceSet: SourceSet) {
 
     val compileTask = tasks.getByName<ProcessResources>(sourceSet.processResourcesTaskName)
     compileTask.apply {
+        exclude("**/README.txt")
         exclude("/*.accesswidener")
     }
 
