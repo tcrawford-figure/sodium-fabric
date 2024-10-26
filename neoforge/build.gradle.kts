@@ -139,3 +139,4 @@ tasks {
         from(configurationCommonModResources)
     }
 }
+
