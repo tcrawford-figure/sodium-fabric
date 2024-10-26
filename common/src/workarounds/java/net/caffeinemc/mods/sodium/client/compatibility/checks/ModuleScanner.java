@@ -106,10 +106,10 @@ public class ModuleScanner {
                             You must either update to a newer version (7.3.4 and later) or close the RivaTuner Statistics Server application.
 
                             For more information on how to solve this problem, click the 'Help' button.""",
-                    "https://github.com/CaffeineMC/sodium-fabric/wiki/Known-Issues#rtss-incompatible");
+                    "https://github.com/CaffeineMC/sodium/wiki/Known-Issues#rtss-incompatible");
 
             throw new RuntimeException("The installed version of RivaTuner Statistics Server (RTSS) is not compatible with Sodium, " +
-                    "see here for more details: https://github.com/CaffeineMC/sodium-fabric/wiki/Known-Issues#rtss-incompatible");
+                    "see here for more details: https://github.com/CaffeineMC/sodium/wiki/Known-Issues#rtss-incompatible");
         }
     }
 
@@ -134,10 +134,10 @@ public class ModuleScanner {
                         b) Completely uninstall the ASUS GPU Tweak III application.
                         
                         For more information on how to solve this problem, click the 'Help' button.""",
-                "https://github.com/CaffeineMC/sodium-fabric/wiki/Known-Issues#asus-gtiii-incompatible");
+                "https://github.com/CaffeineMC/sodium/wiki/Known-Issues#asus-gtiii-incompatible");
 
         throw new RuntimeException("ASUS GPU Tweak III is not compatible with Minecraft, " +
-                "see here for more details: https://github.com/CaffeineMC/sodium-fabric/wiki/Known-Issues#asus-gtiii-incompatible");
+                "see here for more details: https://github.com/CaffeineMC/sodium/wiki/Known-Issues#asus-gtiii-incompatible");
     }
 
     private static @Nullable WindowsFileVersion findRTSSModuleVersion() {

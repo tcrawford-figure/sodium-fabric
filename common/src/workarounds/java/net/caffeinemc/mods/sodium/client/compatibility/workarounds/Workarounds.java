@@ -99,20 +99,20 @@ public class Workarounds {
         /**
          * The NVIDIA driver applies "Threaded Optimizations" when Minecraft is detected, causing severe
          * performance issues and crashes.
-         * <a href="https://github.com/CaffeineMC/sodium-fabric/issues/1816">GitHub Issue</a>
+         * <a href="https://github.com/CaffeineMC/sodium/issues/1816">GitHub Issue</a>
          */
         NVIDIA_THREADED_OPTIMIZATIONS,
 
         /**
          * Requesting a No Error Context causes a crash at startup when using a Wayland session.
-         * <a href="https://github.com/CaffeineMC/sodium-fabric/issues/1624">GitHub Issue</a>
+         * <a href="https://github.com/CaffeineMC/sodium/issues/1624">GitHub Issue</a>
          */
         NO_ERROR_CONTEXT_UNSUPPORTED,
 
         /**
          * Intel's graphics driver for Gen8 and older seems to be faulty and causes a crash when calling
          * glFramebufferBlit after the window loses focus.
-         * <a href="https://github.com/CaffeineMC/sodium-fabric/issues/2727">GitHub Issue</a>
+         * <a href="https://github.com/CaffeineMC/sodium/issues/2727">GitHub Issue</a>
          */
         INTEL_FRAMEBUFFER_BLIT_CRASH_WHEN_UNFOCUSED,
 
@@ -120,7 +120,7 @@ public class Workarounds {
          * Intel's graphics driver for Gen8 and older does not respect depth comparison rules per the OpenGL
          * specification, causing block model overlays to Z-fight when the overlay is on a different render pass than
          * the base model.
-         * <a href="https://github.com/CaffeineMC/sodium-fabric/issues/2830">GitHub Issue</a>
+         * <a href="https://github.com/CaffeineMC/sodium/issues/2830">GitHub Issue</a>
          */
         INTEL_DEPTH_BUFFER_COMPARISON_UNRELIABLE
     }

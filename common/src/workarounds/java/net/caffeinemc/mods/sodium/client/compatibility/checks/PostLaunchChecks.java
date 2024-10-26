@@ -26,7 +26,7 @@ public class PostLaunchChecks {
         }
     }
 
-    // https://github.com/CaffeineMC/sodium-fabric/issues/1916
+    // https://github.com/CaffeineMC/sodium/issues/1916
     private static boolean isUsingPojavLauncher() {
         if (System.getenv("POJAV_RENDERER") != null) {
             LOGGER.warn("Detected presence of environment variable POJAV_LAUNCHER, which seems to indicate we are running on Android");
