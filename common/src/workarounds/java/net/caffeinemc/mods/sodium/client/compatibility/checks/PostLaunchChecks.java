@@ -1,13 +1,9 @@
 package net.caffeinemc.mods.sodium.client.compatibility.checks;
 
-import net.caffeinemc.mods.sodium.client.compatibility.workarounds.nvidia.NvidiaDriverVersion;
 import net.caffeinemc.mods.sodium.client.console.Console;
 import net.caffeinemc.mods.sodium.client.console.message.MessageLevel;
-import net.caffeinemc.mods.sodium.client.compatibility.environment.GLContextInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import oshi.PlatformEnum;
-import oshi.SystemInfo;
 
 /**
  * Performs OpenGL driver validation after the game creates an OpenGL context. This runs immediately after OpenGL

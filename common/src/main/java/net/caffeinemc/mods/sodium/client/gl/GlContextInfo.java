@@ -1,12 +1,11 @@
-package net.caffeinemc.mods.sodium.client.compatibility.environment;
+package net.caffeinemc.mods.sodium.client.gl;
 
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.opengl.GL11C;
 
-public record GLContextInfo(String vendor, String renderer, String version) {
+public record GlContextInfo(String vendor, String renderer, String version) {
     @Nullable
-    public static GLContextInfo create() {
-
+    public static GlContextInfo create() {
         String vendor = GL11C.glGetString(GL11C.GL_VENDOR);
         String renderer = GL11C.glGetString(GL11C.GL_RENDERER);
         String version = GL11C.glGetString(GL11C.GL_VERSION);
@@ -15,6 +14,6 @@ public record GLContextInfo(String vendor, String renderer, String version) {
             return null;
         }
 
-        return new GLContextInfo(vendor, renderer, version);
+        return new GlContextInfo(vendor, renderer, version);
     }
 }

@@ -9,6 +9,10 @@ base {
     archivesName = "sodium-common"
 }
 
+val configurationPreLaunch = configurations.create("preLaunchDeps") {
+    isCanBeResolved = true
+}
+
 sourceSets {
     val main = getByName("main")
     val api = create("api")
@@ -22,7 +26,7 @@ sourceSets {
 
     workarounds.apply {
         java {
-            compileClasspath += main.compileClasspath
+            compileClasspath += configurationPreLaunch
         }
     }
 
@@ -62,6 +66,16 @@ dependencies {
     addDependentFabricModule("fabric-rendering-data-attachment-v1")
 
     modCompileOnly("net.fabricmc.fabric-api:fabric-renderer-api-v1:3.2.9+1172e897d7")
+
+    // We need to be careful during pre-launch that we don't touch any Minecraft classes, since other mods
+    // will not yet have an opportunity to apply transformations.
+    configurationPreLaunch("org.apache.commons:commons-lang3:3.14.0")
+    configurationPreLaunch("commons-io:commons-io:2.15.1")
+    configurationPreLaunch("org.lwjgl:lwjgl:3.3.3")
+    configurationPreLaunch("net.java.dev.jna:jna:5.14.0")
+    configurationPreLaunch("net.java.dev.jna:jna-platform:5.14.0")
+    configurationPreLaunch("org.slf4j:slf4j-api:2.0.9")
+    configurationPreLaunch("org.jetbrains:annotations:25.0.0")
 }
 
 loom {

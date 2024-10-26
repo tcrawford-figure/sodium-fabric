@@ -1,11 +1,9 @@
 package net.caffeinemc.mods.sodium.client.compatibility.checks;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.platform.Window;
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32Util;
-import com.sun.jna.platform.win32.Tlhelp32;
 import net.caffeinemc.mods.sodium.client.platform.MessageBox;
+import net.caffeinemc.mods.sodium.client.platform.NativeWindowHandle;
 import net.caffeinemc.mods.sodium.client.platform.windows.WindowsFileVersion;
 import net.caffeinemc.mods.sodium.client.platform.windows.api.Kernel32;
 import net.caffeinemc.mods.sodium.client.platform.windows.api.version.Version;
@@ -15,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,7 +36,7 @@ public class ModuleScanner {
             "GTIII-OSD64.dll",      "GTIII-OSD.dll"
     };
 
-    public static void checkModules(long window) {
+    public static void checkModules(NativeWindowHandle window) {
         List<String> modules;
 
         try {
@@ -67,21 +67,20 @@ public class ModuleScanner {
 
     private static List<String> listModules() {
         if (!Platform.isWindows()) {
-            return ImmutableList.of();
-        } else {
-            int i = com.sun.jna.platform.win32.Kernel32.INSTANCE.GetCurrentProcessId();
-            ImmutableList.Builder<String> builder = ImmutableList.builder();
-
-            for(Tlhelp32.MODULEENTRY32W mODULEENTRY32W : Kernel32Util.getModules(i)) {
-                String string = mODULEENTRY32W.szModule();
-                builder.add(string);
-            }
-
-            return builder.build();
+            return List.of();
         }
+
+        var pid = com.sun.jna.platform.win32.Kernel32.INSTANCE.GetCurrentProcessId();
+        var modules = new ArrayList<String>();
+
+        for (var module : Kernel32Util.getModules(pid)) {
+            modules.add(module.szModule());
+        }
+
+        return Collections.unmodifiableList(modules);
     }
 
-    private static void checkRTSSModules(long window) {
+    private static void checkRTSSModules(NativeWindowHandle window) {
         LOGGER.warn("RivaTuner Statistics Server (RTSS) has injected into the process! Attempting to apply workarounds for compatibility...");
 
         @Nullable WindowsFileVersion version = null;
@@ -122,7 +121,7 @@ public class ModuleScanner {
         return x > 7 || (x == 7 && y > 3) || (x == 7 && y == 3 && z >= 4);
     }
 
-    private static void checkASUSGpuTweakIII(long window) {
+    private static void checkASUSGpuTweakIII(NativeWindowHandle window) {
         MessageBox.showMessageBox(window, MessageBox.IconType.ERROR, "Sodium Renderer",
                 """
                         ASUS GPU Tweak III is not compatible with Minecraft, and causes extreme performance issues and severe graphical corruption when used with Minecraft.

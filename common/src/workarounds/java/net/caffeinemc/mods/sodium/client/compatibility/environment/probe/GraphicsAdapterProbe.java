@@ -3,11 +3,13 @@ package net.caffeinemc.mods.sodium.client.compatibility.environment.probe;
 import net.caffeinemc.mods.sodium.client.compatibility.environment.OsUtils;
 import net.caffeinemc.mods.sodium.client.platform.windows.api.d3dkmt.D3DKMT;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import oshi.util.ExecutingCommand;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -82,6 +84,10 @@ public class GraphicsAdapterProbe {
                 var adapterVendor = GraphicsAdapterVendor.fromPciVendorId(pciVendorId);
                 var adapterName = getPciDeviceName$Linux(pciVendorId, pciDeviceId);
 
+                if (adapterName == null) {
+                    adapterName = "<unknown>";
+                }
+
                 var info = new GraphicsAdapterInfo.LinuxPciAdapterInfo(adapterVendor, adapterName, pciVendorId, pciDeviceId);
                 results.add(info);
             }
@@ -90,7 +96,7 @@ public class GraphicsAdapterProbe {
         return results;
     }
 
-    private static @NotNull String getPciDeviceName$Linux(String vendorId, String deviceId) {
+    private static @Nullable String getPciDeviceName$Linux(String vendorId, String deviceId) {
         // The Linux kernel doesn't provide a way to get the device name, so we need to use lspci,
         // since it comes with a list of known device names mapped to device IDs.
         // See `man lspci` for more information
@@ -98,13 +104,31 @@ public class GraphicsAdapterProbe {
         // [<vendor>]:[<device>][:<class>[:<prog-if>]]
         var deviceFilter = vendorId.substring(2) + ":" + deviceId.substring(2);
 
-        return ExecutingCommand
-                .runNative("lspci -vmm -d " + deviceFilter)
-                .stream()
-                .filter(line -> line.startsWith("Device:"))
-                .map(line -> line.substring("Device:".length()).trim())
-                .findFirst()
-                .orElse("unknown");
+        try {
+            var process = Runtime.getRuntime()
+                    .exec(new String[] { "lspci", "-vmm", "-d", deviceFilter });
+            var result = process.waitFor();
+
+            if (result != 0) {
+                throw new IOException("lspci exited with error code: %s".formatted(result));
+            }
+
+            try (var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("Device:")) {
+                        return line.substring("Device:".length()).trim();
+                    }
+                }
+            }
+
+            throw new IOException("lspci did not return a device name");
+        } catch (Throwable e) {
+            LOGGER.warn("Failed to query PCI device name for %s:%s".formatted(vendorId, deviceId), e);
+        }
+
+        return null;
     }
 
     public static Collection<? extends GraphicsAdapterInfo> getAdapters() {
