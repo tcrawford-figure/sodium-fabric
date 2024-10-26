@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.caffeinemc"
-version = BuildConfig.MOD_VERSION
+version = BuildConfig.createVersionString(project)
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
