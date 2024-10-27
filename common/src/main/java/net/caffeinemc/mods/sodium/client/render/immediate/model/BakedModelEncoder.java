@@ -38,7 +38,7 @@ public class BakedModelEncoder {
                 float y = quad.getY(i);
                 float z = quad.getZ(i);
 
-                int newLight = mergeLighting(quad.getLight(i), light);
+                int newLight = mergeLighting(quad.getMaxLightQuad(i), light);
 
                 int newColor = color;
 
