@@ -56,7 +56,6 @@ public abstract class ItemRendererMixin {
     private void beforeRenderItem(ItemStack stack, ItemDisplayContext transformMode, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, int overlay, BakedModel model, boolean invert, CallbackInfo ci) {
         if (!((FabricBakedModel) model).isVanillaAdapter()) {
             contexts.get().renderModel(stack, transformMode, invert, matrixStack, vertexConsumerProvider, light, overlay, model);
-            matrixStack.popPose();
             ci.cancel();
         }
     }
