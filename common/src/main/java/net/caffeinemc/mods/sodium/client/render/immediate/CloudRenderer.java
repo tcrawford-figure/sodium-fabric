@@ -101,8 +101,7 @@ public class CloudRenderer {
 
         final var prevShaderFog = copyFog(RenderSystem.getShaderFog());
 
-        Vector4f fogColor = FogRenderer.computeFogColor(camera, tickDelta, level, cloudDistance * 8, Minecraft.getInstance().gameRenderer.getDarkenWorldAmount(tickDelta));
-        FogParameters fogParameters = FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, fogColor, cloudDistance * 8, shouldUseWorldFog(level, pos), tickDelta);
+        FogParameters fogParameters = FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, new Vector4f(prevShaderFog.red(), prevShaderFog.green(), prevShaderFog.blue(), prevShaderFog.alpha()), cloudDistance * 8, shouldUseWorldFog(level, pos), tickDelta);
         RenderSystem.setShaderFog(fogParameters);
 
         boolean fastClouds = geometry.params().renderMode() == CloudStatus.FAST;
