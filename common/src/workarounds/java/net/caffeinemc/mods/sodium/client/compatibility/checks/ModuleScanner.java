@@ -36,6 +36,10 @@ public class ModuleScanner {
             "GTIII-OSD64.dll",      "GTIII-OSD.dll"
     };
 
+    private static final String[] OVERWOLF_OVERLAY_MODULE_NAMES = {
+            "gep_minecraft.dll"
+    };
+
     public static void checkModules(NativeWindowHandle window) {
         List<String> modules;
 
@@ -62,6 +66,13 @@ public class ModuleScanner {
         // the blacklist, or uninstall the application entirely.
         if (BugChecks.ISSUE_2637 && isModuleLoaded(modules, ASUS_GPU_TWEAK_MODULE_NAMES)) {
             checkASUSGpuTweakIII(window);
+        }
+
+        // OverWolf's overlay is broken and modifies the texture bindings from underneath Minecraft. Since disabling
+        // OpenGL state caching in Minecraft for every texture bind is unacceptable, and OverWolf does not provide
+        // any way to detect broken versions of their software, we block all versions.
+        if (BugChecks.ISSUE_2862 & isModuleLoaded(modules, OVERWOLF_OVERLAY_MODULE_NAMES)) {
+            checkOverwolfOverlay(window);
         }
     }
 
@@ -137,6 +148,19 @@ public class ModuleScanner {
 
         throw new RuntimeException("ASUS GPU Tweak III is not compatible with Minecraft, " +
                 "see here for more details: https://github.com/CaffeineMC/sodium/wiki/Known-Issues#asus-gtiii-incompatible");
+    }
+
+    private static void checkOverwolfOverlay(NativeWindowHandle window) {
+        MessageBox.showMessageBox(window, MessageBox.IconType.ERROR, "Sodium Renderer",
+                """
+                        The Overwolf Overlay is not compatible with Minecraft and causes graphical corruption. Please disable the in-game overlay in the Overwolf application, or uninstall the software from your computer.
+                        
+                        For more information on how to solve this problem, click the 'Help' button.""",
+                "https://github.com/CaffeineMC/sodium/wiki/Known-Issues#overwolf-overlay");
+
+        throw new RuntimeException("Overwolf Overlay is not compatible with Minecraft, " +
+                "see here for more details: https://github.com/CaffeineMC/sodium/wiki/Known-Issues#overwolf-overlay");
+
     }
 
     private static @Nullable WindowsFileVersion findRTSSModuleVersion() {
