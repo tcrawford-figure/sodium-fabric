@@ -1,7 +1,6 @@
 package net.caffeinemc.mods.sodium.client.render.immediate;
 
 import com.mojang.blaze3d.buffers.BufferUsage;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -89,6 +88,7 @@ public class CloudRenderer {
         }
 
         VertexBuffer vertexBuffer = geometry.vertexBuffer();
+
         if (vertexBuffer == null) {
             return;
         }
@@ -99,13 +99,12 @@ public class CloudRenderer {
         Matrix4f modelViewMatrix = new Matrix4f(modelView);
         modelViewMatrix.translate(-translateX, relativeCloudY, -translateZ);
 
-        final var prevShaderFog = copyFog(RenderSystem.getShaderFog());
+        final var prevShaderFog = copyShaderFogParameters(RenderSystem.getShaderFog());
 
         FogParameters fogParameters = FogRenderer.setupFog(camera, FogRenderer.FogMode.FOG_TERRAIN, new Vector4f(prevShaderFog.red(), prevShaderFog.green(), prevShaderFog.blue(), prevShaderFog.alpha()), cloudDistance * 8, shouldUseWorldFog(level, pos), tickDelta);
         RenderSystem.setShaderFog(fogParameters);
 
         boolean fastClouds = geometry.params().renderMode() == CloudStatus.FAST;
-        boolean fabulous = Minecraft.useShaderTransparency();
 
         if (fastClouds) {
             RenderSystem.disableCull();
@@ -138,7 +137,7 @@ public class CloudRenderer {
         RenderSystem.setShaderFog(prevShaderFog);
     }
 
-    private FogParameters copyFog(FogParameters shaderFog) {
+    private static FogParameters copyShaderFogParameters(FogParameters shaderFog) {
         return new FogParameters(shaderFog.start(), shaderFog.end(), shaderFog.shape(), shaderFog.red(), shaderFog.green(), shaderFog.blue(), shaderFog.alpha());
     }
 
@@ -146,7 +145,8 @@ public class CloudRenderer {
                                                           CloudGeometryParameters parameters,
                                                           CloudTextureData textureData)
     {
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance()
+                .begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 
         var writer = VertexBufferWriter.of(bufferBuilder);
 
@@ -196,19 +196,24 @@ public class CloudRenderer {
             }
         }
 
-        MeshData builtBuffer = bufferBuilder.build();
+        @Nullable MeshData meshData = bufferBuilder.build();
+        @Nullable VertexBuffer vertexBuffer = null;
 
-        VertexBuffer vertexBuffer = null;
+        if (existingGeometry != null) {
+            vertexBuffer = existingGeometry.vertexBuffer();
+        }
 
-        if (builtBuffer != null) {
-            if (existingGeometry != null) {
-                vertexBuffer = existingGeometry.vertexBuffer();
-            }
+        if (meshData != null) {
             if (vertexBuffer == null) {
                 vertexBuffer = new VertexBuffer(BufferUsage.DYNAMIC_WRITE);
             }
 
-            uploadToVertexBuffer(vertexBuffer, builtBuffer);
+            uploadToVertexBuffer(vertexBuffer, meshData);
+        } else {
+            if (vertexBuffer != null) {
+                vertexBuffer.close();
+                vertexBuffer = null;
+            }
         }
 
         Tesselator.getInstance().clear();
@@ -407,7 +412,10 @@ public class CloudRenderer {
     public void destroy() {
         if (this.cachedGeometry != null) {
             var vertexBuffer = this.cachedGeometry.vertexBuffer();
-            vertexBuffer.close();
+
+            if (vertexBuffer != null) {
+                vertexBuffer.close();
+            }
 
             this.cachedGeometry = null;
         }
@@ -607,7 +615,7 @@ public class CloudRenderer {
         }
     }
 
-    public record CloudGeometry(VertexBuffer vertexBuffer, CloudGeometryParameters params) {
+    public record CloudGeometry(@Nullable VertexBuffer vertexBuffer, CloudGeometryParameters params) {
 
     }
 
