@@ -19,6 +19,7 @@ package net.caffeinemc.mods.sodium.client.render.frapi.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.MatrixUtil;
+import net.caffeinemc.mods.sodium.api.util.ColorMixer;
 import net.caffeinemc.mods.sodium.client.render.frapi.helper.ColorHelper;
 import net.caffeinemc.mods.sodium.client.render.frapi.mesh.EncodingFormat;
 import net.caffeinemc.mods.sodium.client.render.frapi.mesh.MutableQuadViewImpl;
@@ -31,15 +32,12 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.fabric.impl.renderer.VanillaModelEncoder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
@@ -173,7 +171,7 @@ public class ItemRenderContext extends AbstractRenderContext {
             final int itemColor = colorMap.getColor(itemStack, colorIndex);
 
             for (int i = 0; i < 4; i++) {
-                quad.color(i, ColorHelper.multiplyColor(itemColor, quad.color(i)));
+                quad.color(i, ColorMixer.mulComponentWise(itemColor, quad.color(i)));
             }
         }
     }
