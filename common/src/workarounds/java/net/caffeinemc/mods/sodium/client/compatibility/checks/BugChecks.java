@@ -10,7 +10,6 @@ class BugChecks {
     public static final boolean ISSUE_2048 = configureCheck("issue2048", true);
     public static final boolean ISSUE_2561 = configureCheck("issue2561", true);
     public static final boolean ISSUE_2637 = configureCheck("issue2637", true);
-    public static final boolean ISSUE_2862 = configureCheck("issue2862", true);
 
     private static boolean configureCheck(String name, boolean defaultValue) {
         var propertyValue = System.getProperty(getPropertyKey(name), null);
