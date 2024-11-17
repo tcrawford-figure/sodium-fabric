@@ -1,7 +1,7 @@
 package net.caffeinemc.mods.sodium.mixin.features.render.world.clouds;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.ResourceHandle;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.caffeinemc.mods.sodium.client.render.immediate.CloudRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
@@ -40,11 +41,19 @@ public class LevelRendererMixin {
      */
     @Group(name = "sodium$cloudsOverride", min = 1, max = 1)
     @Dynamic
-    @Inject(method = "method_62205", at = @At(value = "HEAD"), cancellable = true, require = 0)
-    public void renderCloudsFabric(ResourceHandle<?> resourceHandle, int color, CloudStatus cloudStatus, float f, Matrix4f modelView, Matrix4f projectionMatrix, Vec3 vec3, float tickDelta, CallbackInfo ci) {
+    @Inject(
+            method = "method_62205",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/CloudRenderer;render(ILnet/minecraft/client/CloudStatus;FLorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/world/phys/Vec3;F)V"
+            ),
+            require = 0,
+            cancellable = true
+    )
+    public void renderCloudsFabric(ResourceHandle<RenderTarget> resourceHandle, int cloudColor, CloudStatus cloudStatus, float cloudHeight, Matrix4f matModelView, Matrix4f matProjection, Vec3 camera, float partialTicks, CallbackInfo ci) {
         ci.cancel();
 
-        sodium$renderClouds(modelView, projectionMatrix, color);
+        this.sodium$renderClouds(matModelView, matProjection, cloudColor);
     }
 
     @Group(name = "sodium$cloudsOverride", min = 1, max = 1)
@@ -53,24 +62,28 @@ public class LevelRendererMixin {
     public void renderCloudsNeo(ResourceHandle<?> resourcehandle, float p_365209_, Vec3 p_362985_, Matrix4f modelView, Matrix4f projectionMatrix, int color, CloudStatus p_364196_, float p_362337_, CallbackInfo ci) {
         ci.cancel();
 
-        sodium$renderClouds(modelView, projectionMatrix, color);
+        this.sodium$renderClouds(modelView, projectionMatrix, color);
     }
 
-    private void sodium$renderClouds(Matrix4f modelView, Matrix4f projectionMatrix, int color) {
+    @Unique
+    private void sodium$renderClouds(Matrix4f matModelView, Matrix4f matProjection, int color) {
         if (this.cloudRenderer == null) {
             this.cloudRenderer = new CloudRenderer(this.minecraft.getResourceManager());
         }
 
-        ClientLevel level = Objects.requireNonNull(this.level);
         Camera camera = this.minecraft.gameRenderer.getMainCamera();
+        ClientLevel level = Objects.requireNonNull(this.level);
 
-        this.cloudRenderer.render(camera, level, projectionMatrix, modelView, this.ticks, this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false), color);
+        var ticks = this.ticks;
+        var partialTicks = this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+
+        this.cloudRenderer.render(camera, level, matProjection, matModelView, ticks, partialTicks, color);
     }
 
     @Inject(method = "onResourceManagerReload(Lnet/minecraft/server/packs/resources/ResourceManager;)V", at = @At("RETURN"))
     private void onReload(ResourceManager manager, CallbackInfo ci) {
         if (this.cloudRenderer != null) {
-            this.cloudRenderer.reloadTextures(manager);
+            this.cloudRenderer.reload(manager);
         }
     }
 
